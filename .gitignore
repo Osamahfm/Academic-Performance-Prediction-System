@@ -1,0 +1,41 @@
+# Database configuration (contains sensitive info)
+config/database.php
+
+# XAMPP specific files
+xampp/
+webalizer/
+dashboard/
+
+# System files
+*.log
+*.tmp
+*.cache
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.bak
+*.backup
+
+# Temporary files
+temp/
+tmp/
+
+
+
+
+
+
+
+
+
+
+

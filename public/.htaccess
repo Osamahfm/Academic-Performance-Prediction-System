@@ -1,0 +1,17 @@
+# Public Directory .htaccess
+# Allow access to public files
+
+# Allow access to assets
+RewriteEngine On
+RewriteBase /projecty/public/
+
+# Allow access to CSS, JS, images, etc.
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$">
+    Order allow,deny
+    Allow from all
+</FilesMatch>
+
+# Front controller pattern - Route all requests through index.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]

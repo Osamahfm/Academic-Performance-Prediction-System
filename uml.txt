@@ -1,0 +1,689 @@
+@startuml Context_Diagram
+!theme plain
+title Context Diagram - EduPredict System
+
+actor "Admin" as Admin
+actor "Instructor" as Instructor
+actor "Student" as Student
+
+rectangle "EduPredict System" {
+    component "Web Interface" as Web
+    component "Application Core" as App
+    component "Database" as DB
+    component "ML Engine" as ML
+}
+
+database "MySQL Database\n(edupredict)" as MySQL
+
+Admin --> Web : Uses
+Instructor --> Web : Uses
+Student --> Web : Uses
+
+Web --> App : Processes Requests
+App --> DB : Data Access
+App --> ML : Prediction Requests
+DB --> MySQL : Stores Data
+ML --> DB : Training Data
+
+@enduml
+
+@startuml Use_Case_Diagram
+!theme plain
+title Use Case Diagram - EduPredict System
+
+left to right direction
+
+actor Admin
+actor Instructor
+actor Student
+
+rectangle "EduPredict System" {
+    package "Authentication" {
+        usecase "Login" as UC1
+        usecase "Register" as UC2
+        usecase "Logout" as UC3
+    }
+    
+    package "Dashboard" {
+        usecase "View Dashboard" as UC4
+        usecase "View Admin Dashboard" as UC5
+        usecase "View Instructor Dashboard" as UC6
+        usecase "View Student Dashboard" as UC7
+    }
+    
+    package "Student Management" {
+        usecase "View Students" as UC8
+        usecase "Add Student" as UC9
+        usecase "Update Student" as UC10
+        usecase "Delete Student" as UC11
+        usecase "View Student Profile" as UC12
+    }
+    
+    package "Course Management" {
+        usecase "View Courses" as UC13
+        usecase "Add Course" as UC14
+        usecase "Update Course" as UC15
+        usecase "Delete Course" as UC16
+        usecase "View Course Details" as UC17
+    }
+    
+    package "Grade Management" {
+        usecase "View Grades" as UC18
+        usecase "Add Grade" as UC19
+        usecase "Update Grade" as UC20
+        usecase "View Grade History" as UC21
+    }
+    
+    package "Prediction System" {
+        usecase "Predict Student Performance" as UC22
+        usecase "View Predictions" as UC23
+        usecase "Predict Course Performance" as UC24
+        usecase "View Prediction History" as UC25
+    }
+    
+    package "Alert System" {
+        usecase "View Alerts" as UC26
+        usecase "Create Alert" as UC27
+        usecase "Resolve Alert" as UC28
+        usecase "Dismiss Alert" as UC29
+    }
+    
+    package "User Management" {
+        usecase "View Users" as UC30
+        usecase "Add User" as UC31
+        usecase "Update User" as UC32
+        usecase "Delete User" as UC33
+    }
+}
+
+' Admin use cases
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC8
+Admin --> UC9
+Admin --> UC10
+Admin --> UC11
+Admin --> UC12
+Admin --> UC13
+Admin --> UC14
+Admin --> UC15
+Admin --> UC16
+Admin --> UC17
+Admin --> UC18
+Admin --> UC19
+Admin --> UC20
+Admin --> UC21
+Admin --> UC22
+Admin --> UC23
+Admin --> UC24
+Admin --> UC25
+Admin --> UC26
+Admin --> UC27
+Admin --> UC28
+Admin --> UC29
+Admin --> UC30
+Admin --> UC31
+Admin --> UC32
+Admin --> UC33
+
+' Instructor use cases
+Instructor --> UC1
+Instructor --> UC3
+Instructor --> UC4
+Instructor --> UC6
+Instructor --> UC12
+Instructor --> UC13
+Instructor --> UC14
+Instructor --> UC15
+Instructor --> UC17
+Instructor --> UC18
+Instructor --> UC19
+Instructor --> UC20
+Instructor --> UC21
+Instructor --> UC22
+Instructor --> UC23
+Instructor --> UC24
+Instructor --> UC25
+Instructor --> UC26
+Instructor --> UC28
+Instructor --> UC29
+
+' Student use cases
+Student --> UC1
+Student --> UC2
+Student --> UC3
+Student --> UC4
+Student --> UC7
+Student --> UC12
+Student --> UC18
+Student --> UC21
+Student --> UC23
+Student --> UC25
+Student --> UC26
+
+' Relationships
+UC19 ..> UC22 : triggers
+UC20 ..> UC22 : triggers
+UC22 ..> UC27 : may create
+
+@enduml
+
+@startuml Sequence_Predict_Performance
+!theme plain
+title Sequence Diagram - Predict Student Performance
+
+actor Student
+participant "Web Browser" as Browser
+participant "Router" as Router
+participant "PredictionController" as Controller
+participant "PredictionService" as Service
+participant "KNNPredictor" as KNN
+participant "StudentModel" as SModel
+participant "GradeModel" as GModel
+participant "Database" as DB
+
+Student -> Browser : Request Prediction
+Browser -> Router : HTTP Request
+Router -> Controller : dispatch()
+Controller -> Controller : requireLogin()
+Controller -> Service : predictPerformance(studentId)
+Service -> SModel : findById(studentId)
+SModel -> DB : SELECT student data
+DB --> SModel : Student data
+SModel --> Service : Student object
+
+Service -> GModel : getGradesByStudent(studentId)
+GModel -> DB : SELECT grades
+DB --> GModel : Grades data
+GModel --> Service : Grades array
+
+Service -> Service : prepareTrainingData()
+Service -> DB : SELECT all students with grades
+DB --> Service : Training data
+
+Service -> KNN : loadTrainingData(trainingData)
+Service -> Service : getStudentFeatures(studentId)
+Service -> KNN : predict(features)
+
+KNN -> KNN : normalizeFeatures()
+KNN -> KNN : calculateDistances()
+KNN -> KNN : findKNearestNeighbors()
+KNN -> KNN : majorityVote()
+KNN --> Service : Prediction result
+
+Service -> Service : identifyRiskFactors()
+Service -> Service : savePrediction()
+Service -> SModel : updateRiskLevel()
+SModel -> DB : UPDATE student
+Service --> Controller : Prediction result
+
+Controller -> Browser : JSON Response
+Browser --> Student : Display Prediction
+
+@enduml
+
+@startuml Sequence_Login
+!theme plain
+title Sequence Diagram - User Login
+
+actor User
+participant "Web Browser" as Browser
+participant "Router" as Router
+participant "AuthController" as Controller
+participant "UserModel" as Model
+participant "Database" as DB
+participant "Session" as Session
+
+User -> Browser : Enter credentials
+Browser -> Router : POST /login
+Router -> Controller : dispatch()
+Controller -> Controller : login()
+
+alt Valid credentials
+    Controller -> Model : findByEmail(email)
+    Model -> DB : SELECT user
+    DB --> Model : User data
+    Model --> Controller : User object
+    
+    Controller -> Model : verifyPassword(password, hash)
+    Model --> Controller : true
+    
+    Controller -> Session : Set session variables
+    Controller -> Browser : Redirect to Dashboard
+    Browser --> User : Dashboard page
+else Invalid credentials
+    Controller -> Browser : Error message
+    Browser --> User : Login page with error
+end
+
+@enduml
+
+@startuml Sequence_Alert_Creation
+!theme plain
+title Sequence Diagram - Alert Creation
+
+participant "PredictionService" as Service
+participant "StudentModel" as SModel
+participant "AlertModel" as AModel
+participant "Database" as DB
+
+Service -> Service : predictPerformance()
+Service -> Service : identifyRiskFactors()
+Service -> SModel : findById(studentId)
+SModel -> DB : SELECT student
+DB --> SModel : Student data
+SModel --> Service : Student object
+
+alt Risk level is high
+    Service -> Service : createRiskAlert()
+    Service -> AModel : getAlertsByStudent()
+    AModel -> DB : SELECT alerts
+    DB --> AModel : Existing alerts
+    AModel --> Service : Alerts array
+    
+    alt No active alert exists
+        Service -> AModel : createAlert()
+        AModel -> DB : INSERT alert
+        DB --> AModel : Alert created
+        AModel --> Service : Success
+    else Active alert exists
+        Service -> Service : Skip creation
+    end
+end
+
+@enduml
+
+@startuml Class_Diagram
+!theme plain
+title Class Diagram - EduPredict System
+
+package "Core" {
+    class Database {
+        -instance: Database
+        -connection: PDO
+        -host: string
+        -dbname: string
+        -username: string
+        -password: string
+        +getInstance(): Database
+        +getConnection(): PDO
+    }
+    
+    class Router {
+        -routes: array
+        -routeDefinitions: array
+        +addRoute()
+        +dispatch(): void
+        -matchRoute()
+        -matchPath()
+        -loadRoutes(): void
+    }
+    
+    class Controller {
+        #db: PDO
+        +view(): void
+        +redirect(): void
+        +isLoggedIn(): bool
+        +requireLogin(): void
+        +requireRole(): void
+        +jsonResponse(): void
+    }
+    
+    class Model {
+        #db: PDO
+        #table: string
+        +findAll(): array
+        +findOne(): array
+        +findById(): array
+        +create(): int
+        +update(): int
+        +delete(): int
+        +count(): int
+    }
+    
+    class Validator {
+        -strategies: array
+        +validate(): bool
+        +addStrategy(): void
+    }
+}
+
+package "Controllers" {
+    class AuthController {
+        -userModel: UserModel
+        +login(): void
+        +register(): void
+        +logout(): void
+    }
+    
+    class PredictionController {
+        -predictionService: PredictionService
+        -predictionModel: PredictionModel
+        -studentModel: StudentModel
+        -courseModel: CourseModel
+        +index(): void
+        +predictStudent(): void
+        +predictAll(): void
+        +predictCourse(): void
+        +course(): void
+    }
+    
+    class AlertController {
+        -alertModel: AlertModel
+        -courseModel: CourseModel
+        +index(): void
+        +resolve(): void
+        +dismiss(): void
+    }
+    
+    class DashboardController {
+        +index(): void
+        +admin(): void
+        +instructor(): void
+        +student(): void
+    }
+    
+    class HomeController {
+        +index(): void
+    }
+    
+    class PageController {
+        +about(): void
+        +services(): void
+        +portfolio(): void
+    }
+    
+    class CrudController {
+        +index(): void
+        +show(): void
+        +create(): void
+        +update(): void
+        +delete(): void
+    }
+}
+
+package "Models" {
+    class UserModel {
+        -table: string = "users"
+        +findByEmail(): array
+        +createUser(): int
+        +verifyPassword(): bool
+        +getActiveUsers(): array
+        +getUserByRole(): array
+    }
+    
+    class StudentModel {
+        -table: string = "students"
+        +findByUserId(): array
+        +getAtRiskStudents(): array
+        +getStudentWithUser(): array
+        +updateRiskLevel(): int
+    }
+    
+    class CourseModel {
+        -table: string = "courses"
+        +getCoursesByInstructor(): array
+        +getCourseWithInstructor(): array
+    }
+    
+    class GradeModel {
+        -table: string = "grades"
+        +getGradesByStudent(): array
+        +getGradesByCourse(): array
+        +getAverageGrade(): float
+        +triggerPrediction(): void
+    }
+    
+    class AlertModel {
+        -table: string = "alerts"
+        +getAlertsByStudent(): array
+        +getAlertsByInstructor(): array
+        +createAlert(): int
+        +resolveAlert(): int
+        +dismissAlert(): int
+    }
+    
+    class PredictionModel {
+        -table: string = "predictions"
+        +getPredictionsByStudent(): array
+        +getPredictionsByCourse(): array
+        +savePrediction(): int
+    }
+}
+
+package "Services" {
+    class PredictionService {
+        -knnPredictor: KNNPredictor
+        -studentModel: StudentModel
+        -gradeModel: GradeModel
+        -predictionModel: PredictionModel
+        -alertModel: AlertModel
+        +predictPerformance(): array
+        +predictAllStudents(): array
+        +predictCourseStudents(): array
+        -prepareTrainingData(): array
+        -getStudentFeatures(): array
+        -identifyRiskFactors(): array
+        -createRiskAlert(): void
+    }
+}
+
+package "ML" {
+    class KNNPredictor {
+        -k: int
+        -trainingData: array
+        +__construct()
+        +loadTrainingData(): void
+        +predict(): array
+        +predictCourseGrade(): float
+        -euclideanDistance(): float
+        -normalizeFeatures(): array
+        -getMinMaxValues(): array
+    }
+}
+
+' Relationships
+Controller <|-- AuthController
+Controller <|-- PredictionController
+Controller <|-- AlertController
+Controller <|-- DashboardController
+Controller <|-- HomeController
+Controller <|-- PageController
+Controller <|-- CrudController
+
+Model <|-- UserModel
+Model <|-- StudentModel
+Model <|-- CourseModel
+Model <|-- GradeModel
+Model <|-- AlertModel
+Model <|-- PredictionModel
+
+Controller --> Database : uses
+Model --> Database : uses
+PredictionController --> PredictionService : uses
+PredictionService --> KNNPredictor : uses
+PredictionService --> StudentModel : uses
+PredictionService --> GradeModel : uses
+PredictionService --> AlertModel : uses
+AlertController --> AlertModel : uses
+AuthController --> UserModel : uses
+
+Database ..> Database : singleton
+
+@enduml
+
+@startuml State_Diagram
+!theme plain
+title State Diagram - Student Risk Level Management
+
+[*] --> Initial : System Start
+
+state Initial {
+    [*] --> NoData
+    NoData : No student data available
+}
+
+Initial --> DataCollection : Student enrolled
+
+state DataCollection {
+    [*] --> CollectingGrades
+    CollectingGrades : Collecting grades and attendance
+    CollectingGrades --> SufficientData : Enough data collected
+    SufficientData : GPA, attendance, grades available
+}
+
+DataCollection --> Prediction : Trigger prediction
+
+state Prediction {
+    [*] --> LoadingTrainingData
+    LoadingTrainingData : Load training data from database
+    LoadingTrainingData --> CalculatingFeatures
+    CalculatingFeatures : Calculate student features
+    CalculatingFeatures --> RunningKNN
+    RunningKNN : Run KNN algorithm
+    RunningKNN --> DeterminingRisk
+    DeterminingRisk : Determine risk level
+}
+
+Prediction --> LowRisk : Risk = Low
+Prediction --> MediumRisk : Risk = Medium
+Prediction --> HighRisk : Risk = High
+
+state LowRisk {
+    [*] --> Monitoring
+    Monitoring : Monitor student performance
+    Monitoring --> LowRisk : Performance maintained
+    Monitoring --> MediumRisk : Performance declined
+}
+
+state MediumRisk {
+    [*] --> Monitoring
+    Monitoring : Monitor student performance
+    Monitoring --> LowRisk : Performance improved
+    Monitoring --> HighRisk : Performance declined
+    Monitoring --> MediumRisk : Performance stable
+}
+
+state HighRisk {
+    [*] --> AlertCreated
+    AlertCreated : Alert created for instructor
+    AlertCreated --> Intervention
+    Intervention : Intervention actions taken
+    Intervention --> Monitoring
+    Monitoring : Monitor after intervention
+    Monitoring --> MediumRisk : Performance improved
+    Monitoring --> HighRisk : Performance still poor
+    Monitoring --> Escalation : No improvement
+}
+
+state Escalation {
+    [*] --> AdminNotified
+    AdminNotified : Admin notified
+    AdminNotified --> AdditionalActions
+    AdditionalActions : Additional actions taken
+}
+
+Escalation --> HighRisk : Continue monitoring
+HighRisk --> MediumRisk : Performance improved
+MediumRisk --> LowRisk : Performance improved
+
+LowRisk --> [*] : Student graduated
+MediumRisk --> [*] : Student graduated
+HighRisk --> [*] : Student graduated
+
+note right of HighRisk
+    When risk level changes to High:
+    - Alert is automatically created
+    - Instructor is notified
+    - Prediction is saved
+end note
+
+note right of Prediction
+    KNN Algorithm:
+    1. Load training data
+    2. Normalize features
+    3. Calculate distances
+    4. Find k nearest neighbors
+    5. Majority vote for risk level
+end note
+
+@enduml
+
+@startuml State_Diagram_User_Session
+!theme plain
+title State Diagram - User Session Management
+
+[*] --> LoggedOut : System Start
+
+state LoggedOut {
+    [*] --> ViewingPublicPages
+    ViewingPublicPages : Can view public pages
+    ViewingPublicPages --> AttemptingLogin : User clicks login
+}
+
+LoggedOut --> Authenticating : Submit credentials
+
+state Authenticating {
+    [*] --> ValidatingCredentials
+    ValidatingCredentials : Check email and password
+    ValidatingCredentials --> Valid : Credentials correct
+    ValidatingCredentials --> Invalid : Credentials incorrect
+}
+
+Authenticating --> LoggedIn : Valid credentials
+Authenticating --> LoggedOut : Invalid credentials
+
+state LoggedIn {
+    [*] --> SessionActive
+    SessionActive : Session variables set
+    
+    state RoleBased {
+        [*] --> AdminDashboard
+        [*] --> InstructorDashboard
+        [*] --> StudentDashboard
+        
+        AdminDashboard : Full system access
+        InstructorDashboard : Course and student management
+        StudentDashboard : View own data
+    }
+    
+    SessionActive --> RoleBased : Redirect to dashboard
+    RoleBased --> UsingSystem : User interacts
+    UsingSystem : Using various features
+    UsingSystem --> SessionActive : Return to dashboard
+}
+
+LoggedIn --> SessionExpired : Timeout or inactivity
+LoggedIn --> LoggedOut : User logs out
+
+state SessionExpired {
+    [*] --> SessionCleared
+    SessionCleared : Session variables cleared
+}
+
+SessionExpired --> LoggedOut : Redirect to login
+
+LoggedOut --> [*] : System shutdown
+
+note right of Authenticating
+    Validation Process:
+    1. Check if user exists
+    2. Verify password hash
+    3. Check user status (active/inactive)
+    4. Set session variables
+end note
+
+note right of LoggedIn
+    Session Variables:
+    - user_id
+    - role (admin/instructor/student)
+    - name
+    - email
+end note
+
+@enduml
+
+

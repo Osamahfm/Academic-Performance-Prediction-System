@@ -1,0 +1,40 @@
+# EduPredict URL Rewriting
+# Redirects old URLs to MVC front controller
+
+RewriteEngine On
+RewriteBase /projecty/
+
+# Redirect root index.php to public/index.php
+RewriteRule ^index\.php$ public/index.php [L,R=301]
+
+# Redirect old page URLs to MVC routes
+RewriteRule ^about\.php$ public/index.php?controller=page&action=about [L,R=301]
+RewriteRule ^contact\.php$ public/index.php?controller=contact&action=index [L,R=301]
+RewriteRule ^services\.php$ public/index.php?controller=page&action=services [L,R=301]
+RewriteRule ^portfolio\.php$ public/index.php?controller=page&action=portfolio [L,R=301]
+
+# Redirect auth URLs
+RewriteRule ^login\.php$ public/index.php?controller=auth&action=login [L,R=301]
+RewriteRule ^register\.php$ public/index.php?controller=auth&action=register [L,R=301]
+RewriteRule ^logout\.php$ public/index.php?controller=auth&action=logout [L,R=301]
+
+# Redirect dashboard URLs
+RewriteRule ^admin-dashboard\.php$ public/index.php?controller=dashboard&action=admin [L,R=301]
+RewriteRule ^instructor-dashboard\.php$ public/index.php?controller=dashboard&action=instructor [L,R=301]
+RewriteRule ^student-dashboard\.php$ public/index.php?controller=dashboard&action=student [L,R=301]
+
+# Redirect root to public/index.php
+RewriteRule ^$ public/index.php [L]
+
+# Prevent direct access to app folder
+RewriteRule ^app/ - [F,L]
+
+# Prevent direct access to config folder
+RewriteRule ^config/ - [F,L]
+
+# Prevent direct access to tests folder
+RewriteRule ^tests/ - [F,L]
+
+
+
+

@@ -1,0 +1,108 @@
+<?php
+/**
+ * Generate test runner file
+ * Run: php tests/generate-runner.php > tests/run-tests.php
+ */
+
+echo '<?php
+/**
+ * Test Runner
+ * Executes all unit tests
+ */
+
+// Set up autoloader first
+spl_autoload_register(function ($class) {
+    $prefix = \'App\\\\\';
+    $baseDir = __DIR__ . \'/../app/\';
+    
+    $len = strlen($prefix);
+    if (strncmp($prefix, $class, $len) !== 0) {
+        return;
+    }
+    
+    $relativeClass = substr($class, $len);
+    $file = $baseDir . str_replace(\'\\\\\', \'/\', $relativeClass) . \'.php\';
+    
+    if (file_exists($file)) {
+        require $file;
+    }
+});
+
+// Load core dependencies in order
+require_once __DIR__ . \'/../app/core/Database.php\';
+require_once __DIR__ . \'/../app/core/Model.php\';
+require_once __DIR__ . \'/../app/core/Validator.php\';
+require_once __DIR__ . \'/../app/core/Factory/ModelFactory.php\';
+require_once __DIR__ . \'/../app/core/Strategy/ValidationStrategy.php\';
+require_once __DIR__ . \'/../app/core/ML/KNNPredictor.php\';
+
+// Load models (they depend on Model base class)
+require_once __DIR__ . \'/../app/models/UserModel.php\';
+require_once __DIR__ . \'/../app/models/StudentModel.php\';
+require_once __DIR__ . \'/../app/models/GradeModel.php\';
+require_once __DIR__ . \'/../app/models/PredictionModel.php\';
+require_once __DIR__ . \'/../app/models/AlertModel.php\';
+require_once __DIR__ . \'/../app/models/CourseModel.php\';
+require_once __DIR__ . \'/../app/models/ContactModel.php\';
+require_once __DIR__ . \'/../app/models/MenuModel.php\';
+
+// Load services (they depend on models)
+require_once __DIR__ . \'/../app/services/PredictionService.php\';
+
+// Initialize database connection (some tests may need it)
+try {
+    ob_start();
+    \\App\\Core\\Database::getInstance();
+    ob_end_clean();
+} catch (Exception $e) {
+    // Database not available - some tests will skip database-dependent tests
+}
+
+echo "========================================\\n";
+echo "EduPredict Unit Test Suite\\n";
+echo "========================================\\n\\n";
+
+// Include test files
+require_once __DIR__ . \'/Unit/ValidatorTest.php\';
+require_once __DIR__ . \'/Unit/ModelFactoryTest.php\';
+require_once __DIR__ . \'/Unit/KNNPredictorTest.php\';
+require_once __DIR__ . \'/Unit/ValidationStrategyTest.php\';
+require_once __DIR__ . \'/Unit/GradeModelTest.php\';
+require_once __DIR__ . \'/Unit/PredictionServiceTest.php\';
+
+// Run all tests
+$tests = [
+    new ValidatorTest(),
+    new ModelFactoryTest(),
+    new KNNPredictorTest(),
+    new ValidationStrategyTest(),
+    new GradeModelTest(),
+    new PredictionServiceTest()
+];
+
+$passed = 0;
+$failed = 0;
+
+foreach ($tests as $test) {
+    try {
+        $test->runAll();
+        $passed++;
+    } catch (Exception $e) {
+        $failed++;
+        echo "❌ Test suite failed: " . $e->getMessage() . "\\n";
+        if (strpos($e->getMessage(), \'Stack trace\') === false) {
+            echo "Stack trace: " . $e->getTraceAsString() . "\\n";
+        }
+    }
+    echo "\\n";
+}
+
+echo "========================================\\n";
+echo "Test Summary\\n";
+echo "========================================\\n";
+echo "Passed: {$passed}\\n";
+echo "Failed: {$failed}\\n";
+echo "Total: " . ($passed + $failed) . "\\n";
+echo "========================================\\n";
+';
+

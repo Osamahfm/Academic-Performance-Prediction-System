@@ -12,19 +12,9 @@ if ($_POST) {
     $message_text = $_POST['message'] ?? '';
     
     if (!empty($name) && !empty($email) && !empty($message_text)) {
-        try {
-            require_once 'config/database.php';
-            $pdo = getDBConnection();
-            
-            $stmt = $pdo->prepare("INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$name, $email, $subject, $message_text]);
-            
-            $message = 'Thank you for your message! We will get back to you soon.';
-            $message_type = 'success';
-        } catch (Exception $e) {
-            $message = 'Sorry, there was an error saving your message. Please try again.';
-            $message_type = 'error';
-        }
+        // Here you would typically send the email or save to database
+        $message = 'Thank you for your message! We will get back to you soon.';
+        $message_type = 'success';
     } else {
         $message = 'Please fill in all required fields.';
         $message_type = 'error';
@@ -36,7 +26,7 @@ if ($_POST) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact - EduPredict</title>
+    <title>Contact - Creative Project</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -47,8 +37,8 @@ if ($_POST) {
         <div class="nav-container">
             <div class="nav-logo">
                 <a href="index.php">
-                    <i class="fas fa-graduation-cap"></i>
-                    <span>EduPredict</span>
+                    <i class="fas fa-rocket"></i>
+                    <span>CreativeProject</span>
                 </a>
             </div>
             
@@ -122,7 +112,7 @@ if ($_POST) {
                             </div>
                             <div class="contact-text">
                                 <h3>Address</h3>
-                                <p>123 University Avenue<br>Education City, EC 12345</p>
+                                <p>123 Creative Street<br>Design City, DC 12345</p>
                             </div>
                         </div>
                         
@@ -142,7 +132,7 @@ if ($_POST) {
                             </div>
                             <div class="contact-text">
                                 <h3>Email</h3>
-                                <p>support@edupredict.edu</p>
+                                <p>hello@creativeproject.com</p>
                             </div>
                         </div>
                         
@@ -204,11 +194,11 @@ if ($_POST) {
             <div class="footer-content">
                 <div class="footer-section">
                     <div class="footer-logo">
-                        <i class="fas fa-graduation-cap"></i>
-                        <span>EduPredict</span>
+                        <i class="fas fa-rocket"></i>
+                        <span>CreativeProject</span>
                     </div>
                     <p class="footer-description">
-                        Predicting academic performance with advanced analytics and machine learning.
+                        Creating amazing web experiences with modern technology and creative design.
                     </p>
                     <div class="social-links">
                         <a href="#" class="social-link">
@@ -253,7 +243,7 @@ if ($_POST) {
                     <div class="contact-info">
                         <div class="contact-item">
                             <i class="fas fa-envelope"></i>
-                            <span>support@edupredict.edu</span>
+                            <span>hello@creativeproject.com</span>
                         </div>
                         <div class="contact-item">
                             <i class="fas fa-phone"></i>
@@ -261,14 +251,14 @@ if ($_POST) {
                         </div>
                         <div class="contact-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span>123 University Avenue, Education City</span>
+                            <span>123 Creative Street, Design City</span>
                         </div>
                     </div>
                 </div>
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2026 EduPredict. All rights reserved.</p>
+                <p>&copy; 2024 CreativeProject. All rights reserved.</p>
             </div>
         </div>
     </footer>
