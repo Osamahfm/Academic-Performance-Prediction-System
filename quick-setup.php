@@ -130,6 +130,15 @@ $tables = [
         status ENUM('new', 'reviewed', 'resolved') DEFAULT 'new',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    )",
+    "contact_messages" => "CREATE TABLE IF NOT EXISTS contact_messages (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        email VARCHAR(100) NOT NULL,
+        subject VARCHAR(200),
+        message TEXT NOT NULL,
+        status ENUM('new', 'read', 'replied') DEFAULT 'new',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )"
 ];
 
@@ -191,10 +200,17 @@ echo "<div class='success'>
 </div>";
 
 echo "<div style='text-align: center; margin-top: 30px;'>
-    <a href='login.php' class='btn'>🔐 Go to Login</a>
-    <a href='index.php' class='btn'>🏠 Go to Homepage</a>
+    <a href='/projecty/public/index.php?controller=auth&action=login' class='btn'>🔐 Go to Login</a>
+    <a href='/projecty/public/index.php?controller=home&action=index' class='btn'>🏠 Go to Homepage</a>
 </div>";
 
 echo "</div></body></html>";
 ?>
+
+
+
+
+
+
+
 

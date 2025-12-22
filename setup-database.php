@@ -1,5 +1,5 @@
 <?php
-require_once 'config/database.php';
+require_once __DIR__ . '/../config/database.php';
 
 echo "<h2>EduPredict Database Setup</h2>";
 
@@ -15,10 +15,20 @@ try {
     echo "<li><strong>Student:</strong> student@edupredict.edu / student123</li>";
     echo "</ul>";
     
-    echo "<p><a href='login.php'>Go to Login Page</a></p>";
+    echo "<p><a href='/projecty/public/index.php?controller=auth&action=login'>Go to Login Page</a></p>";
     
 } catch (Exception $e) {
     echo "<p style='color: red;'>❌ Error: " . $e->getMessage() . "</p>";
 }
 ?>
+
+
+
+
+
+
+
+
+
+
 
