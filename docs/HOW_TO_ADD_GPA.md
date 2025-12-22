@@ -191,7 +191,7 @@ After bulk update, check the statistics section:
 ## 🔗 Related Pages
 
 - **GPA Management:** `/projecty/utilities/manage-student-gpa.php`
-- **Train KNN Model:** `/projecty/utilities/train-knn-model.php`
+- **Train KNN Model:** `/projecty/public/index.php?controller=prediction&action=train`
 - **View Predictions:** `/projecty/public/predictions`
 - **Manage Students:** `/projecty/public/index.php?controller=crud&action=index&entity=student`
 
@@ -212,4 +212,5 @@ After bulk update, check the statistics section:
 ---
 
 **That's it!** Your students now have GPA and attendance data, and predictions will work! 🎉
+
 

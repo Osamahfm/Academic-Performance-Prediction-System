@@ -47,6 +47,7 @@ class GradeModel extends Model {
     /**
      * Trigger KNN prediction after grade is added
      * This is called automatically when a grade is created
+     * Regenerates predictions for ALL courses since overall GPA depends on all grades
      */
     public function triggerPrediction($studentId, $courseId = null) {
         try {
@@ -59,7 +60,20 @@ class GradeModel extends Model {
             if ($student && $student['gpa'] !== null && $student['attendance_rate'] !== null) {
                 // Run prediction in background (don't block the request)
                 $predictionService = new \App\Services\PredictionService();
-                $predictionService->predictPerformance($studentId, $courseId);
+                
+                // Get all courses the student is enrolled in
+                $enrollmentsSql = "SELECT course_id FROM enrollments WHERE student_id = :student_id AND status = 'active'";
+                $enrollStmt = $this->db->prepare($enrollmentsSql);
+                $enrollStmt->execute([':student_id' => $studentId]);
+                $courseIds = $enrollStmt->fetchAll(\PDO::FETCH_COLUMN);
+                
+                // Regenerate predictions for each course (since GPA depends on all courses)
+                foreach ($courseIds as $cid) {
+                    $predictionService->predictPerformance($studentId, $cid);
+                }
+                
+                // Also regenerate overall prediction
+                $predictionService->predictPerformance($studentId, null);
             }
         } catch (\Exception $e) {
             // Silently fail - prediction is not critical for grade creation

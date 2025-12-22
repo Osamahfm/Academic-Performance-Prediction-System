@@ -125,11 +125,16 @@
     </style>
 </head>
 <body>
+    <?php
+    // Determine current user role and id for instructor-specific behavior
+    $currentRole = $_SESSION['role'] ?? 'admin';
+    $currentUserId = $_SESSION['user_id'] ?? null;
+    ?>
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-book"></i> Manage Courses</h1>
             <div>
-                <a href="/projecty/public/index.php?controller=dashboard&action=admin" class="btn btn-secondary">
+                <a href="/projecty/public/index.php?controller=dashboard&action=<?php echo $currentRole === 'instructor' ? 'instructor' : 'admin'; ?>" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Back to Dashboard
                 </a>
                 <button onclick="openModal('addModal')" class="btn btn-success">
@@ -198,10 +203,15 @@
                     <label>Credits *</label>
                     <input type="number" id="courseCredits" name="credits" min="1" max="6" required>
                 </div>
-                <div class="form-group">
-                    <label>Instructor ID</label>
-                    <input type="number" id="courseInstructor" name="instructor_id">
-                </div>
+                <?php if ($currentRole === 'admin'): ?>
+                    <div class="form-group">
+                        <label>Instructor ID</label>
+                        <input type="number" id="courseInstructor" name="instructor_id">
+                    </div>
+                <?php else: ?>
+                    <!-- For instructors, automatically assign themselves as the instructor -->
+                    <input type="hidden" id="courseInstructor" name="instructor_id" value="<?php echo htmlspecialchars($currentUserId ?? ''); ?>">
+                <?php endif; ?>
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="submit" class="btn btn-success" style="flex: 1;">Save</button>
                     <button type="button" onclick="closeModal('addModal')" class="btn btn-secondary" style="flex: 1;">Cancel</button>
@@ -216,6 +226,11 @@
             document.getElementById('courseForm').reset();
             document.getElementById('courseId').value = '';
             document.getElementById('modalTitle').textContent = 'Add Course';
+
+            // If not admin, keep instructor_id fixed to current user
+            <?php if ($currentRole !== 'admin'): ?>
+            document.getElementById('courseInstructor').value = '<?php echo htmlspecialchars($currentUserId ?? ''); ?>';
+            <?php endif; ?>
         }
 
         function closeModal(modalId) {
@@ -229,7 +244,10 @@
             document.getElementById('courseCode').value = course.course_code || '';
             document.getElementById('courseName').value = course.course_name || '';
             document.getElementById('courseCredits').value = course.credits || '';
+            // Only allow changing instructor_id if admin; instructors stay assigned to themselves
+            <?php if ($currentRole === 'admin'): ?>
             document.getElementById('courseInstructor').value = course.instructor_id || '';
+            <?php endif; ?>
         }
 
         function saveCourse(event) {
@@ -287,6 +305,7 @@
     </script>
 </body>
 </html>
+
 
 
 

@@ -265,8 +265,42 @@
 
         function saveUser(event) {
             event.preventDefault();
-            const formData = new FormData(event.target);
-            const userId = formData.get('id');
+
+            // Basic client-side validation before submitting
+            const form = event.target;
+            const name = form.userName.value.trim();
+            const email = form.userEmail.value.trim();
+            const role = form.userRole.value;
+            const password = form.userPassword.value;
+            const userId = form.userId.value;
+
+            if (!name || name.length < 2) {
+                alert('Name is required and must be at least 2 characters.');
+                form.userName.focus();
+                return;
+            }
+
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email || !emailPattern.test(email)) {
+                alert('Please enter a valid email address.');
+                form.userEmail.focus();
+                return;
+            }
+
+            if (!role) {
+                alert('Please select a role.');
+                form.userRole.focus();
+                return;
+            }
+
+            // When creating a new user, password is required and should be a reasonable length
+            if (!userId && (!password || password.length < 6)) {
+                alert('Password is required for new users and must be at least 6 characters.');
+                form.userPassword.focus();
+                return;
+            }
+
+            const formData = new FormData(form);
             const url = userId 
                 ? `/projecty/public/index.php?controller=crud&action=update&entity=user&id=${userId}`
                 : `/projecty/public/index.php?controller=crud&action=create&entity=user`;
@@ -318,6 +352,7 @@
     </script>
 </body>
 </html>
+
 
 
 

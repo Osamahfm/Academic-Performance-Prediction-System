@@ -23,9 +23,14 @@ define('SESSION_LIFETIME', 3600); // 1 hour
 define('APP_NAME', 'EduPredict');
 define('APP_VERSION', '1.0.0');
 
+// HTTPS enforcement (set to true in production environments)
+// When enabled, the front controller will redirect all HTTP traffic to HTTPS.
+define('FORCE_HTTPS', false);
+
 // Error Reporting (set to 0 in production)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
+
 
 
 

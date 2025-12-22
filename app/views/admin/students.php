@@ -151,7 +151,7 @@
                 <a href="/projecty/utilities/manage-student-gpa.php" class="btn btn-success">
                     <i class="fas fa-chart-line"></i> Manage GPA
                 </a>
-                <a href="/projecty/utilities/train-knn-model.php" class="btn btn-success">
+                <a href="/projecty/public/index.php?controller=prediction&action=train" class="btn btn-success">
                     <i class="fas fa-brain"></i> Train KNN
                 </a>
             </div>

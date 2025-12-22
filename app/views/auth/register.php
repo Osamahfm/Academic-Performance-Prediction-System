@@ -218,8 +218,12 @@
             </div>
         </div>
     </div>
+
+    <!-- Shared UI + validation scripts -->
+    <script src="/projecty/public/assets/js/script.js"></script>
 </body>
 </html>
+
 
 
 

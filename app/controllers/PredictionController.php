@@ -166,12 +166,69 @@ class PredictionController extends Controller {
                             if ($latestPrediction && !empty($latestPrediction['risk_factors'])) {
                                 $riskFactors = json_decode($latestPrediction['risk_factors'], true);
                                 if (is_array($riskFactors)) {
-                                    foreach ($riskFactors as $factor) {
-                                        if (stripos($factor, 'Low GPA (0.00)') !== false || 
-                                            stripos($factor, 'Low attendance rate (0.0%)') !== false) {
-                                            $needsRefresh = true;
-                                            break;
+                                    foreach ($riskFactors as $key => $factor) {
+                                        // Skip prediction_data array, only check string risk factors
+                                        if ($key === 'prediction_data') {
+                                            continue;
                                         }
+                                        // Only process string risk factors
+                                        if (is_string($factor)) {
+                                            if (stripos($factor, 'Low GPA (0.00)') !== false || 
+                                                stripos($factor, 'Low attendance rate (0.0%)') !== false) {
+                                                $needsRefresh = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Check if new grades or enrollments have been added since last prediction
+                            if (!$needsRefresh && $latestPrediction) {
+                                $db = \App\Core\Database::getInstance()->getConnection();
+                                $lastPredictionDate = $latestPrediction['prediction_date'] ?? null;
+                                
+                                if ($lastPredictionDate) {
+                                    // Check if any grades were added after the last prediction
+                                    $newGradesSql = "SELECT COUNT(*) FROM grades 
+                                                    WHERE student_id = :student_id 
+                                                    AND date_recorded > :prediction_date";
+                                    $newGradesStmt = $db->prepare($newGradesSql);
+                                    $newGradesStmt->execute([
+                                        ':student_id' => $studentId,
+                                        ':prediction_date' => $lastPredictionDate
+                                    ]);
+                                    $newGradesCount = $newGradesStmt->fetchColumn();
+                                    
+                                    // Check if any new enrollments were added
+                                    $newEnrollmentsSql = "SELECT COUNT(*) FROM enrollments 
+                                                         WHERE student_id = :student_id 
+                                                         AND status = 'active'
+                                                         AND enrollment_date > :prediction_date";
+                                    $newEnrollmentsStmt = $db->prepare($newEnrollmentsSql);
+                                    $newEnrollmentsStmt->execute([
+                                        ':student_id' => $studentId,
+                                        ':prediction_date' => $lastPredictionDate
+                                    ]);
+                                    $newEnrollmentsCount = $newEnrollmentsStmt->fetchColumn();
+                                    
+                                    // Check if number of enrolled courses changed
+                                    $currentEnrollmentsSql = "SELECT COUNT(DISTINCT course_id) FROM enrollments 
+                                                              WHERE student_id = :student_id AND status = 'active'";
+                                    $currentEnrollmentsStmt = $db->prepare($currentEnrollmentsSql);
+                                    $currentEnrollmentsStmt->execute([':student_id' => $studentId]);
+                                    $currentCourseCount = $currentEnrollmentsStmt->fetchColumn();
+                                    
+                                    // Count how many course-specific predictions exist
+                                    $predictionCountSql = "SELECT COUNT(*) FROM predictions 
+                                                          WHERE student_id = :student_id 
+                                                          AND course_id IS NOT NULL";
+                                    $predictionCountStmt = $db->prepare($predictionCountSql);
+                                    $predictionCountStmt->execute([':student_id' => $studentId]);
+                                    $predictionCount = $predictionCountStmt->fetchColumn();
+                                    
+                                    if ($newGradesCount > 0 || $newEnrollmentsCount > 0 || $currentCourseCount != $predictionCount) {
+                                        $needsRefresh = true;
                                     }
                                 }
                             }
@@ -188,9 +245,16 @@ class PredictionController extends Controller {
                             $enrollStmt->execute([':student_id' => $studentId]);
                             $courseIds = $enrollStmt->fetchAll(\PDO::FETCH_COLUMN);
                             
-                            // Generate predictions for each course
-                            foreach ($courseIds as $courseId) {
-                                $this->predictionService->predictPerformance($studentId, $courseId);
+                            // Generate predictions for each course (only if student has grades)
+                            if (!empty($courseIds)) {
+                                foreach ($courseIds as $courseId) {
+                                    try {
+                                        $this->predictionService->predictPerformance($studentId, $courseId);
+                                    } catch (\Exception $e) {
+                                        // Log but continue with other courses
+                                        error_log("Prediction failed for course {$courseId}: " . $e->getMessage());
+                                    }
+                                }
                             }
                             
                             // Also generate overall prediction (courseId = null)
@@ -260,7 +324,7 @@ class PredictionController extends Controller {
                 
                 foreach ($students as $student) {
                     try {
-                        // Get all courses for this student
+                        // Get all courses this student is currently enrolled in
                         $enrollmentsSql = "SELECT course_id FROM enrollments WHERE student_id = :student_id AND status = 'active'";
                         $enrollStmt = $db->prepare($enrollmentsSql);
                         $enrollStmt->execute([':student_id' => $student['id']]);

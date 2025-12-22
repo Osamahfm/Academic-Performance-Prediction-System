@@ -71,8 +71,8 @@ class DashboardController extends Controller {
         $instructorId = $_SESSION['user_id'];
         $courses = $this->courseModel->getCoursesByInstructor($instructorId);
         
-        // Get at-risk students
-        $atRiskStudents = $this->studentModel->getAtRiskStudents('high');
+        // Get at-risk students (joined with user + course info for this instructor)
+        $atRiskStudents = $this->studentModel->getAtRiskStudentsByInstructor($instructorId, 'high');
         
         // Get active alerts count
         $activeAlertsCount = $this->alertModel->getAlertCountByInstructor($instructorId);

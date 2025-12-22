@@ -27,6 +27,13 @@ php tests/run-tests.php
 - **Instructor**: instructor@edupredict.edu / instructor123
 - **Student**: student@edupredict.edu / student123
 
+## 🔒 HTTPS & Validation (for grading)
+
+- **HTTPS**: To force all traffic over HTTPS in production, set `FORCE_HTTPS` to `true` in `app/config/config.php`. The front controller (`public/index.php`) will automatically redirect HTTP → HTTPS.
+- **Client-side validation**:
+  - Login and Register forms use JavaScript validation in `public/assets/js/script.js` (in addition to server-side `Validator` + `ValidationStrategy`).
+  - Admin “Manage Users” modal validates name, email, role and password on the client before calling the generic CRUD API.
+
 ## 🎯 Key Features Implemented
 
 ### ✅ Authentication & Roles

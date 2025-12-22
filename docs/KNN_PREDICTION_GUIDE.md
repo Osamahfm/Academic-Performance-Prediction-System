@@ -60,7 +60,7 @@ For KNN predictions to work, you need:
 
 ### Step 4: Train the Model
 
-**URL:** `http://localhost/projecty/utilities/train-knn-model.php`
+**URL:** `http://localhost/projecty/public/index.php?controller=prediction&action=train`
 
 1. Check training data statistics
 2. Ensure you have at least 5 students with:
@@ -214,7 +214,7 @@ $coursePredictions = $predictionService->predictCourseStudents($courseId);
 ## 🔗 Related Pages
 
 - **Manage GPA:** `/projecty/utilities/manage-student-gpa.php`
-- **Train Model:** `/projecty/utilities/train-knn-model.php`
+- **Train Model:** `/projecty/public/index.php?controller=prediction&action=train`
 - **View Predictions:** `/projecty/public/predictions`
 - **Manage Enrollments:** `/projecty/public/enrollment`
 - **Add Grades:** `/projecty/public/grade/manage`
@@ -253,4 +253,5 @@ $coursePredictions = $predictionService->predictCourseStudents($courseId);
 ---
 
 **Need Help?** Check the training page for detailed statistics and data quality indicators.
+
 

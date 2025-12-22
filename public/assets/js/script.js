@@ -258,6 +258,132 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 500);
         }, 1000);
     });
+
+    // ------------------------------------
+    // Form Validation (client-side helpers)
+    // ------------------------------------
+
+    // Login form validation
+    const loginForm = document.querySelector('form.login-form');
+    if (loginForm) {
+        const emailInput = loginForm.querySelector('input[name="email"]');
+        const passwordInput = loginForm.querySelector('input[name="password"]');
+
+        loginForm.addEventListener('submit', function (e) {
+            let valid = true;
+
+            if (emailInput) {
+                emailInput.setCustomValidity('');
+                const email = emailInput.value.trim();
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email) {
+                    emailInput.setCustomValidity('Email is required.');
+                    valid = false;
+                } else if (!emailPattern.test(email)) {
+                    emailInput.setCustomValidity('Please enter a valid email address.');
+                    valid = false;
+                }
+                if (!valid) {
+                    emailInput.reportValidity();
+                }
+            }
+
+            if (valid && passwordInput) {
+                passwordInput.setCustomValidity('');
+                const password = passwordInput.value;
+                if (!password) {
+                    passwordInput.setCustomValidity('Password is required.');
+                    passwordInput.reportValidity();
+                    valid = false;
+                } else if (password.length < 6) {
+                    passwordInput.setCustomValidity('Password should be at least 6 characters.');
+                    passwordInput.reportValidity();
+                    valid = false;
+                }
+            }
+
+            if (!valid) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    // Registration form validation
+    const registerForm = document.querySelector('form.register-form');
+    if (registerForm) {
+        const nameInput = registerForm.querySelector('input[name="name"]');
+        const emailInput = registerForm.querySelector('input[name="email"]');
+        const roleSelect = registerForm.querySelector('select[name="role"]');
+        const passwordInput = registerForm.querySelector('input[name="password"]');
+        const confirmInput = registerForm.querySelector('input[name="confirm_password"]');
+
+        registerForm.addEventListener('submit', function (e) {
+            let valid = true;
+
+            if (nameInput) {
+                nameInput.setCustomValidity('');
+                const name = nameInput.value.trim();
+                if (!name) {
+                    nameInput.setCustomValidity('Name is required.');
+                    nameInput.reportValidity();
+                    valid = false;
+                } else if (name.length < 2) {
+                    nameInput.setCustomValidity('Name must be at least 2 characters.');
+                    nameInput.reportValidity();
+                    valid = false;
+                }
+            }
+
+            if (valid && emailInput) {
+                emailInput.setCustomValidity('');
+                const email = emailInput.value.trim();
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!email) {
+                    emailInput.setCustomValidity('Email is required.');
+                    emailInput.reportValidity();
+                    valid = false;
+                } else if (!emailPattern.test(email)) {
+                    emailInput.setCustomValidity('Please enter a valid email address.');
+                    emailInput.reportValidity();
+                    valid = false;
+                }
+            }
+
+            if (valid && roleSelect) {
+                roleSelect.setCustomValidity('');
+                if (!roleSelect.value) {
+                    roleSelect.setCustomValidity('Please select a role.');
+                    roleSelect.reportValidity();
+                    valid = false;
+                }
+            }
+
+            if (valid && passwordInput && confirmInput) {
+                passwordInput.setCustomValidity('');
+                confirmInput.setCustomValidity('');
+                const password = passwordInput.value;
+                const confirm = confirmInput.value;
+
+                if (!password) {
+                    passwordInput.setCustomValidity('Password is required.');
+                    passwordInput.reportValidity();
+                    valid = false;
+                } else if (password.length < 6) {
+                    passwordInput.setCustomValidity('Password must be at least 6 characters.');
+                    passwordInput.reportValidity();
+                    valid = false;
+                } else if (password !== confirm) {
+                    confirmInput.setCustomValidity('Passwords do not match.');
+                    confirmInput.reportValidity();
+                    valid = false;
+                }
+            }
+
+            if (!valid) {
+                e.preventDefault();
+            }
+        });
+    }
 });
 
 // Add some utility functions

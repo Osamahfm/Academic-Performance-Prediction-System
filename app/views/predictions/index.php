@@ -235,8 +235,8 @@
                         </div>
                         <div class="prediction-details">
                             <div class="detail-item">
-                                <div class="detail-label">Predicted Grade</div>
-                                <div class="detail-value">${pred.predicted_grade.toFixed(2)}</div>
+                                <div class="detail-label">Predicted GPA</div>
+                                <div class="detail-value">${pred.predicted_gpa ? pred.predicted_gpa.toFixed(2) : 'N/A'}</div>
                             </div>
                             <div class="detail-item">
                                 <div class="detail-label">Risk Level</div>
@@ -268,6 +268,7 @@
     </script>
 </body>
 </html>
+
 
 
 
