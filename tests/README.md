@@ -261,3 +261,7 @@ php tests/run-tests.php || exit 1
 - Some tests modify database - use test database in production
 - Reflection is used to test private methods - consider making them protected/public for testing
 
+
+
+
+
